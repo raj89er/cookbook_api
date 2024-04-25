@@ -66,7 +66,7 @@ Stores information about users' favorite recipes, linking users and recipes they
 
 ##### User Routes:
 -  **[GET] /user/:id** : Requires token authentication and returns information about a specific user.
--  **[POSTS] /user** : Requires token authentication and creates a new user.
+-  **[POST] /user** : Requires token authentication and creates a new user.
 -  **[PUT] /user/:id** : Requires token authentication and updates a specific user.
 -  **[DELETE] /user/:id** : Requires token authentication and deletes a specific user.  
 
