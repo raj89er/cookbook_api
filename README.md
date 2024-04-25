@@ -3,97 +3,58 @@
 ### Database Design (ERD)
 
 #### Users Table
-    Stores user information for registration, authentication, and authorization. Manages user accounts within the app.
-    
-    | Field         | Data Type    | Key       |
-    |---------------|--------------|-----------|
-    | user_id       | INT          | Primary   |
-    | username      | VARCHAR(50)  | Unique, not null |
-    | email         | VARCHAR(100) | Unique, not null |
-    | password      | VARCHAR(100) |           |
-    | date_created  | DATETIME     | not null  |
+Stores user information for registration, authentication, and authorization. Manages user accounts within the app.
 
-#### Ingredient Table
+| Field         | Data Type    | Key               |
+|---------------|--------------|-------------------|
+| user_id       | INT          | Primary Key       |
+| username      | VARCHAR(50)  | Unique, Not Null  |
+| password_hash | VARCHAR      | Not Null          |
+| token         | VARCHAR      |                   |
+| token_expiration | DATETIME  |                   |
 
-    List of ingredients used in recipes, including name and optional alias for names in different languages or variations.
-    
-    | Field         | Data Type    | Key       |
-    |---------------|--------------|-----------|
-    | ingredient_id | INT          | Primary   |
-    | name          | VARCHAR(100) | not null  |
-    | alias         | VARCHAR(100) |           |
-    
+#### Recipes Table
+Stores information about recipes, including titles, cooking and preparation times, ingredients, directions, and tips.
 
-#### Recipe Table
-    
-    Table for the recipes...
-    
-    | Field         | Data Type    | Key       |
-    |---------------|--------------|-----------|
-    | recipe_id     | INT          | Primary   |
-    | title         | VARCHAR(100) | not null  |
-    | description   | TEXT         |           |
-    | directions    | TEXT         |           |
-    | cook_time     | INT          |           |
-    | prep_time     | INT          |           |
-    | servings      | INT          |           |
-    | category      | VARCHAR      |           |
-    | image         | VARCHAR      |           |
-    | date_created  | DATETIME     | not null  |
-    | date_updated  | DATETIME     | not null  |
-    | url_link      | VARCHAR      |           |
-    | user_id       | INT          | Foreign   |
-    
+| Field         | Data Type    | Key               |
+|---------------|--------------|-------------------|
+| recipe_id     | INT          | Primary Key       |
+| title         | VARCHAR      | Not Null          |
+| cook_time     | INT          |                   |
+| prep_time     | INT          |                   |
+| tips          | TEXT         |                   |
+| created_at    | DATETIME     | Default: Current Timestamp |
+| user_id       | INT          | Foreign Key (Users) |
 
-#### Recipe_Ingredients Table
-    
-    Links the Recipe & Ingredient tables. Also stores the quantity and measurement unit for each ingredient in a recipe. Optional field to indicate if an ingredient is optional in the recipe.
-    
-    | Field         | Data Type    | Key      |
-    |---------------|--------------|----------|
-    | rec_ingr_id    | INT          | Primary  |
-    | quantity      | DECIMAL(8,2)  |          |
-    | measurement   | VARCHAR(20)  |          |
-    | optional      | BOOLEAN      |          |
-    | recipe_id     | INT          | Foreign  |
-    | ingredient_id | INT          | Foreign  |
+#### Ingredients Table
+Stores information about ingredients used in recipes, including names, quantities, units, and associated recipes.
 
-#### UnitConversion Table
-    Stores conversion factors for measurement units, ensuring consistency in ingredient quantities across recipes.
-    
-    | Field              | Data Type    | Key      |
-    |--------------------|--------------|----------|
-    | unit_conv_id       | INT          | Primary  |
-    | from_unit_metric   | VARCHAR(20)  |          |
-    | to_unit_metric     | VARCHAR(20)  |          |
-    | factor_metric      | DECIMAL(8,5) |          |
-    | from_unit_imperial | VARCHAR(20)  |          |
-    | to_unit_imperial   | VARCHAR(20)  |          |
-    | factor_imperial    | DECIMAL(8,5) |          |
+| Field           | Data Type    | Key               |
+|-----------------|--------------|-------------------|
+| ingredient_id   | INT          | Primary Key       |
+| name            | VARCHAR(100) | Not Null          |
+| quantity        | FLOAT        |                   |
+| units           | VARCHAR(20)  |                   |
+| recipe_id       | INT          | Foreign Key (Recipes) |
 
-#### Favorite Table
-    
-    Allows users to save recipes as favorites for quick access and future reference.
+#### Directions Table
+Stores step-by-step directions for preparing recipes, associated with specific recipes.
 
-    | Field         | Data Type    | Key       |
-    |---------------|--------------|-----------|
-    | favorite_id   | INT          | Primary   |
-    | favorite      | BOOLEAN      |           |
-    | date_added    | DATETIME     | not null  |
-    | user_id       | INT          | Foreign   |
-    | recipe_id     | INT          | Foreign   |
+| Field           | Data Type    | Key               |
+|-----------------|--------------|-------------------|
+| direction_id    | INT          | Primary Key       |
+| step_number     | INT          | Not Null          |
+| instruction     | TEXT         | Not Null          |
+| recipe_id       | INT          | Foreign Key (Recipes) |
 
-#### Comment Table
-    
-    Enables users to leave comments on recipes for feedback, suggestions, etc.
-    
-    | Field         | Data Type    | Key       |
-    |---------------|--------------|-----------|
-    | comment_id    | INT          | Primary   |
-    | comment_text  | TEXT         | not null  |
-    | created_at    | DATETIME     | not null  |
-    | user_id       | INT          | Foreign   |
-    | recipe_id     | INT          | Foreign   |
+#### Favorites Table
+Stores information about users' favorite recipes, linking users and recipes they have favorited.
+
+| Field           | Data Type    | Key               |
+|-----------------|--------------|-------------------|
+| fav_id          | INT          | Primary Key       |
+| user_id         | INT          | Foreign Key (Users) |
+| recipe_id       | INT          | Foreign Key (Recipes) |
 
 
 ### API Routes and Endpoints

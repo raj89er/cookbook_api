@@ -118,11 +118,9 @@ class Ingredient(db.Model):
     units = db.Column(db.String(20))
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.recipe_id'), nullable=False)
 
-    def __init__(self, name, quantity, units, recipe_id):
-        self.name = name
-        self.quantity = quantity
-        self.units = units
-        self.recipe_id = recipe_id
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+        self.save()
 
     def __repr__(self):
         return f'<Ingredient {self.name}>'
