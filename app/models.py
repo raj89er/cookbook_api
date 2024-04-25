@@ -1,4 +1,3 @@
-
 import secrets
 from datetime import datetime, timedelta, timezone
 from app import db
@@ -60,13 +59,13 @@ class User(db.Model):
 
 class Recipe(db.Model):
     recipe_id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
+    title = db.Column(db.String, nullable=False)
     cook_time = db.Column(db.Integer)  # in minutes
     prep_time = db.Column(db.Integer)  # in minutes
     ingredients = db.relationship('Ingredient', backref='recipe', lazy=True)
     directions = db.relationship('Direction', backref='recipe', lazy=True)
     tips = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, datetime.now(timezone.utc))
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
 
     def __init__(self, title, cook_time=None, prep_time=None, tips=None, user_id=None):
@@ -89,7 +88,6 @@ class Recipe(db.Model):
         db.session.add(direction)
         db.session.commit()
 
-    # method to save recipe to database
     def update(self, **kwargs):
         allowed_fields = ['title', 'cook_time', 'prep_time', 'tips']
         for key, value in kwargs.items():
@@ -108,11 +106,10 @@ class Recipe(db.Model):
             'cook_time': self.cook_time,
             'prep_time': self.prep_time,
             'tips': self.tips,
-            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'created_at': self.created_at,
             'user_id': self.user_id,
         }
-    
-    
+
 
 class Ingredient(db.Model):
     ingredient_id = db.Column(db.Integer, primary_key=True)
@@ -121,13 +118,39 @@ class Ingredient(db.Model):
     units = db.Column(db.String(20))
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.recipe_id'), nullable=False)
 
+    def __init__(self, name, quantity, units, recipe_id):
+        self.name = name
+        self.quantity = quantity
+        self.units = units
+        self.recipe_id = recipe_id
+
+    def __repr__(self):
+        return f'<Ingredient {self.name}>'
+
+
 class Direction(db.Model):
     direction_id = db.Column(db.Integer, primary_key=True)
     step_number = db.Column(db.Integer, nullable=False)
     instruction = db.Column(db.Text, nullable=False)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.recipe_id'), nullable=False)
 
+    def __init__(self, step_number, instruction, recipe_id):
+        self.step_number = step_number
+        self.instruction = instruction
+        self.recipe_id = recipe_id
+
+    def __repr__(self):
+        return f'<Direction {self.step_number}>'
+
+
 class Favorite(db.Model):
     fav_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.recipe_id'), nullable=False)
+
+    def __init__(self, user_id, recipe_id):
+        self.user_id = user_id
+        self.recipe_id = recipe_id
+
+    def __repr__(self):
+        return f'<Favorite {self.user_id}-{self.recipe_id}>'
