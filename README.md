@@ -61,14 +61,14 @@ Stores information about users' favorite recipes, linking users and recipes they
 
 ##### Auth Routes:  
 
--  **[/token]** : Requires basic authentication and returns a token for the authenticated user.
--  **[/users/me]** : Requires token authentication and returns information about the authenticated user.
+-  [/token]
+-  [/users/me]
 
 ##### User Routes:
--  **[GET] /user/:id** : Requires token authentication and returns information about a specific user.
--  **[POST] /user** : Requires token authentication and creates a new user.
--  **[PUT] /user/:id** : Requires token authentication and updates a specific user.
--  **[DELETE] /user/:id** : Requires token authentication and deletes a specific user.  
+-  /users/<int:user_id>', methods=['GET']specific user.
+-  /users', methods=['POST']
+-  [PUT] /user/:id** 
+-  [DELETE] /user/:id** 
 
 #### Possible Routes....
 
