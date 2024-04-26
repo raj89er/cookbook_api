@@ -68,7 +68,7 @@ class Recipe(db.Model):
     ingredients = db.relationship('Ingredient', backref='recipe', lazy=True)
     directions = db.relationship('Direction', backref='recipe', lazy=True)
     tips = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
 
     def __init__(self, title, cook_time=None, prep_time=None, tips=None, user_id=None):

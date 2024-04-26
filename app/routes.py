@@ -2,7 +2,7 @@
 import secrets
 from flask import request
 from . import app , db
-from models import User, Recipe, Favorite
+from .models import User, Recipe, Favorite
 from .auth import basic_auth, token_auth
 
 # Token route & endpoint
