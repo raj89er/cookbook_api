@@ -145,13 +145,16 @@ class Direction(db.Model):
 
 
 class Favorite(db.Model):
-    fav_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.recipe_id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), primary_key=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.recipe_id'), primary_key=True)
+    is_favorite = db.Column(db.Boolean, default=True, nullable=False)
 
-    def __init__(self, user_id, recipe_id):
+    def __init__(self, user_id, recipe_id, is_favorite=True):
         self.user_id = user_id
         self.recipe_id = recipe_id
+        self.is_favorite = is_favorite
 
     def __repr__(self):
-        return f'<Favorite {self.user_id}-{self.recipe_id}>'
+        return f'<Favorite user_id={self.user_id} recipe_id={self.recipe_id} is_favorite={self.is_favorite}>'
+
+
