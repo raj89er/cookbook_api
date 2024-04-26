@@ -177,51 +177,45 @@ def delete_recipe(recipe_id):
     recipe.delete()
     return {"success": "Recipe deleted successfully"}, 200
 
-# Favorites routes & endpoints
-## [GET] /favorites
+# [GET] /favorites
 @app.route('/favorites', methods=['GET'])
 @token_auth.login_required
 def get_favorites():
-    user = token_auth.current_user()
-    favorites = Favorite.query.filter_by(user_id=user.user_id, is_favorite=True).all()
-    favorite_recipes = [fav.recipe.to_dict() for fav in favorites]
-    return {"favorites": favorite_recipes}, 200
+    current_user = token_auth.current_user()
+    favorite_recipes = db.session.query(Recipe).join(Favorite).filter(Favorite.user_id == current_user.user_id, Favorite.is_favorite == True).all()
+    favorite_list = [recipe.to_dict() for recipe in favorite_recipes]
+    return {"favorites": favorite_list}, 200
 
-## [POST] /favorites/<recipe_id>
+# [POST] /favorites/<recipe_id>
 @app.route('/favorites/<int:recipe_id>', methods=['POST'])
 @token_auth.login_required
-def add_favorite(recipe_id):
-    user = token_auth.current_user()
+def toggle_favorite(recipe_id):
+    current_user = token_auth.current_user()
     recipe = db.session.get(Recipe, recipe_id)
     if recipe is None:
         return {"error": f'Recipe with ID {recipe_id} not found'}, 404
-    favorite = Favorite.query.filter_by(user_id=user.user_id, recipe_id=recipe_id).first()
+    # Check if the recipe is already a favorite for the user
+    favorite = db.session.query(Favorite).filter_by(user_id=current_user.user_id, recipe_id=recipe_id).first()
     if favorite:
-        if favorite.is_favorite:
-            return {"error": "Recipe is already in favorites"}, 400
-        else:
-            favorite.is_favorite = True
-            db.session.commit()
-            return {"success": "Recipe added to favorites"}, 200
+        # Toggle the is_favorite status
+        favorite.is_favorite = not favorite.is_favorite
     else:
-        new_favorite = Favorite(user_id=user.user_id, recipe_id=recipe_id, is_favorite=True)
-        db.session.add(new_favorite)
-        db.session.commit()
-        return {"success": "Recipe added to favorites"}, 200
+        # Add the recipe to favorites
+        favorite = Favorite(user_id=current_user.user_id, recipe_id=recipe_id)
+        db.session.add(favorite)
+    db.session.commit()
+    return {"success": "Favorite status updated successfully"}, 200
 
-## [DELETE] /favorites/<recipe_id>
+# [DELETE] /favorites/<recipe_id>
 @app.route('/favorites/<int:recipe_id>', methods=['DELETE'])
 @token_auth.login_required
 def remove_favorite(recipe_id):
-    user = token_auth.current_user()
-    favorite = Favorite.query.filter_by(user_id=user.user_id, recipe_id=recipe_id).first()
+    current_user = token_auth.current_user()
+    favorite = db.session.query(Favorite).filter_by(user_id=current_user.user_id, recipe_id=recipe_id).first()
     if favorite:
-        if favorite.is_favorite:
-            favorite.is_favorite = False
-            db.session.commit()
-            return {"success": "Recipe removed from favorites"}, 200
-        else:
-            return {"error": "Recipe is not in favorites"}, 400
+        db.session.delete(favorite)
+        db.session.commit()
+        return {"success": "Recipe removed from favorites successfully"}, 200
     else:
-        return {"error": "Favorite entry not found"}, 404
+        return {"error": "Recipe is not in your favorites"}, 404
 
