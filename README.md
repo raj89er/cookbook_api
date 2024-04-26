@@ -5,56 +5,58 @@
 #### Users Table
 Stores user information for registration, authentication, and authorization. Manages user accounts within the app.
 
-| Field         | Data Type    | Key               |
-|---------------|--------------|-------------------|
-| user_id       | INT          | Primary Key       |
-| username      | VARCHAR(50)  | Unique, Not Null  |
-| password_hash | VARCHAR      | Not Null          |
-| token         | VARCHAR      |                   |
-| token_expiration | DATETIME  |                   |
+| Field             | Data Type        | Key                 |
+|-------------------|------------------|---------------------|
+| user_id           | INT              | Primary             |
+| username          | TEXT(50)         | Unique, not null    |
+| email             | TEXT(50)         | Unique              |
+| password          | TEXT             |                     |
+| token             | TEXT             |                     |
+| token_expiration  | DATETIME         |                     |
 
 #### Recipes Table
-Stores information about recipes, including titles, cooking and preparation times, ingredients, directions, and tips.
+Contains details of recipes, including cook time, prep time, ingredients, directions, and tips.
 
-| Field         | Data Type    | Key               |
-|---------------|--------------|-------------------|
-| recipe_id     | INT          | Primary Key       |
-| title         | VARCHAR      | Not Null          |
-| cook_time     | INT          |                   |
-| prep_time     | INT          |                   |
-| tips          | TEXT         |                   |
-| created_at    | DATETIME     | Default: Current Timestamp |
-| user_id       | INT          | Foreign Key (Users) |
+| Field             | Data Type        | Key                 |
+|-------------------|------------------|---------------------|
+| recipe_id         | INT              | Primary             |
+| title             | TEXT             | Not null            |
+| cook_time         | INT              |                     |
+| prep_time         | INT              |                     |
+| tips              | TEXT             |                     |
+| created_at        | DATETIME         |                     |
+| user_id           | INT              | Foreign key (Users) |
 
 #### Ingredients Table
-Stores information about ingredients used in recipes, including names, quantities, units, and associated recipes.
+Stores ingredient details for recipes, including quantity and units.
 
-| Field           | Data Type    | Key               |
-|-----------------|--------------|-------------------|
-| ingredient_id   | INT          | Primary Key       |
-| name            | VARCHAR(100) | Not Null          |
-| quantity        | FLOAT        |                   |
-| units           | VARCHAR(20)  |                   |
-| recipe_id       | INT          | Foreign Key (Recipes) |
+| Field             | Data Type        | Key                 |
+|-------------------|------------------|---------------------|
+| ingredient_id     | INT              | Primary             |
+| name              | VARCHAR(100)     | Not null            |
+| quantity          | FLOAT            |                     |
+| units             | VARCHAR(20)      |                     |
+| recipe_id         | INT              | Foreign key (Recipes)|
 
 #### Directions Table
-Stores step-by-step directions for preparing recipes, associated with specific recipes.
+Stores step-by-step instructions for recipes.
 
-| Field           | Data Type    | Key               |
-|-----------------|--------------|-------------------|
-| direction_id    | INT          | Primary Key       |
-| step_number     | INT          | Not Null          |
-| instruction     | TEXT         | Not Null          |
-| recipe_id       | INT          | Foreign Key (Recipes) |
+| Field             | Data Type        | Key                 |
+|-------------------|------------------|---------------------|
+| direction_id      | INT              | Primary             |
+| step_number       | INT              | Not null            |
+| instruction       | TEXT             | Not null            |
+| recipe_id         | INT              | Foreign key (Recipes)|
 
 #### Favorites Table
-Stores information about users' favorite recipes, linking users and recipes they have favorited.
+Stores information about recipes marked as favorites by users.
 
-| Field           | Data Type    | Key               |
-|-----------------|--------------|-------------------|
-| fav_id          | INT          | Primary Key       |
-| user_id         | INT          | Foreign Key (Users) |
-| recipe_id       | INT          | Foreign Key (Recipes) |
+| Field             | Data Type        | Key                 |
+|-------------------|------------------|---------------------|
+| user_id           | INT              | Primary, Foreign key (Users)|
+| recipe_id         | INT              | Primary, Foreign key (Recipes)|
+| is_fav            | BOOLEAN          |                     |
+
 
 
 ### API Routes and Endpoints
