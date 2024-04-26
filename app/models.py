@@ -69,7 +69,7 @@ class Recipe(db.Model):
     directions = db.relationship('Direction', backref='recipe', lazy=True)
     tips = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=True)  # Updated line
 
     def __init__(self, title, cook_time=None, prep_time=None, tips=None, user_id=None):
         self.title = title
@@ -82,7 +82,8 @@ class Recipe(db.Model):
         return f'<Recipe {self.title}>'
 
     def add_ingredient(self, name, quantity, units):
-        ingredient = Ingredient(name=name, quantity=quantity, units=units, recipe_id=self.recipe_id)
+        ingredient = Ingredient(name=name, quantity=quantity, units=units)
+        self.ingredients.append(ingredient)
         db.session.add(ingredient)
         db.session.commit()
 
@@ -121,9 +122,11 @@ class Ingredient(db.Model):
     units = db.Column(db.Text(20))
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.recipe_id'), nullable=False)
 
-    def __init__(self,**kwargs):
-        super().__init__(**kwargs)
-        self.save()
+    def __init__(self, name, quantity=None, units=None, recipe_id=None):
+        self.name = name
+        self.quantity = quantity
+        self.units = units
+        self.recipe_id = recipe_id
 
     def __repr__(self):
         return f'<Ingredient {self.name}>'

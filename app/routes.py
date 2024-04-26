@@ -2,7 +2,7 @@
 import secrets
 from flask import request
 from . import app , db
-from .models import User, Recipe, Favorite
+from .models import User, Recipe, Favorite, Ingredient, Direction
 from .auth import basic_auth, token_auth
 
 # Token route & endpoint
@@ -12,40 +12,48 @@ def get_token():
     user = basic_auth.current_user()
     return user.get_token()
 
-# User routes & endpoints
-## [POST] /user
-@app.route('/users', methods=['POST'])
-def create_user():
-    # Ensure the request is a JSON object
+# [POST] /recipes
+@app.route('/recipes', methods=['POST'])
+def add_recipe():
+    data = request.json
+    # JSON check
     if not request.is_json:
         return {"error": "Request must be in JSON format"}, 400
-    # chheck request for required/missing fields
-    data = request.json
-    required_fields = ['username', 'password', 'email']
+    # Required fields check
+    required_fields = ['title', 'cook_time', 'prep_time']
     missing_fields = []
     for field in required_fields:
         if field not in data:
             missing_fields.append(field)
     if missing_fields:
-        return {"error": f"You're missing the following fields: {', '.join(missing_fields)}"}, 400
-    # Extract the username, password, and email from the request
-    username = data['username']
-    email = data['email']
-    password = data['password']
-    # Check if the username/email already exists
-    existing_user = db.session.get(User.query.filter(User.username == username).exists()).scalar()
-    if existing_user:
-        return {"error": "An account with the email provided already exists"}, 400
-    existing_email = db.session.get(User.query.filter(User.email == email).exists()).scalar()
-    if existing_email:
-        return {"error": "An account with the email provided already exists"}, 400
-    # Generate a token for the new user
-    token = secrets.token_hex(16)
-    new_user = User(username=username, email=email, password=password, token=token)
-    new_user.set_password(password)
-    db.session.add(new_user)
+        return {"error": f"You're missing the following fields in the request: {', '.join(missing_fields)}"}, 400
+    # Extract data from JSON
+    data = request.get_json()
+    title = data.get('title')
+    cook_time = data.get('cook_time')
+    prep_time = data.get('prep_time')
+    ingredients_data = data.get('ingredients', [])
+    directions_data = data.get('directions', [])
+    tips = data.get('tips')
+    new_recipe = Recipe(title=title, cook_time=cook_time, prep_time=prep_time, tips=tips)
+    # Create the new recipe
+    # Add ingredients to the recipe
+    for ingredient_data in ingredients_data:
+        name = ingredient_data.get('name')
+        quantity = ingredient_data.get('quantity')
+        units = ingredient_data.get('units')
+        new_recipe.add_ingredient(name=name, quantity=quantity, units=units)
+
+    # Add directions to the recipe
+    for direction_data in directions_data:
+        step_number = direction_data.get('step_number')
+        instruction = direction_data.get('instruction')
+        new_recipe.add_direction(step_number=step_number, instruction=instruction)
+
+    # Save the new recipe to the database
+    db.session.add(new_recipe)
     db.session.commit()
-    return {"success": f"Account with username '{username}' was created successfully... You're password is (password123)!"}, 201
+    return {"success": f"Recipe {new_recipe.title} created successfully"}, 201
 
 ## [GET] /users/me
 @app.route('/users/me', methods=['GET'])
@@ -121,7 +129,6 @@ def get_recipe(recipe_id):
 
 # [POST] /recipes
 @app.route('/recipes', methods=['POST'])
-@token_auth.login_required
 def create_recipe():
     data = request.json
     # JSON check
@@ -139,16 +146,21 @@ def create_recipe():
     title = data['title']
     cook_time = data['cook_time']
     prep_time = data['prep_time']
-    ingredients = data.get('ingredients', [])
-    directions = data.get('directions', [])
+    ingredients_data = data.get('ingredients', [])
+    directions_data = data.get('directions', [])
     tips = data.get('tips', '')
     # Create the new recipe
-    current_user = token_auth.current_user()
-    new_recipe = Recipe(title=title, cook_time=cook_time, prep_time=prep_time, user_id=current_user.user_id,
-                        ingredients=ingredients, directions=directions, tips=tips)
+    new_recipe = Recipe(
+        title=title,
+        cook_time=cook_time,
+        prep_time=prep_time,
+        ingredients=[Ingredient(**ingredient) for ingredient in ingredients_data],
+        directions=[Direction(**direction) for direction in directions_data],
+        tips=tips)
     db.session.add(new_recipe)
     db.session.commit()
     return {"success": "Recipe created successfully"}, 201
+
 
 ## [PUT] /recipes/<recipe_id>
 @app.route('/recipes/<int:recipe_id>', methods=['PUT'])
@@ -182,7 +194,7 @@ def delete_recipe(recipe_id):
 @token_auth.login_required
 def get_favorites():
     current_user = token_auth.current_user()
-    favorite_recipes = db.session.query(Recipe).join(Favorite).filter(Favorite.user_id == current_user.user_id, Favorite.is_favorite == True).all()
+    favorite_recipes = db.session.query(Recipe).join(Favorite).filter(Favorite.user_id == current_user.user_id, Favorite.is_favorite == True)
     favorite_list = [recipe.to_dict() for recipe in favorite_recipes]
     return {"favorites": favorite_list}, 200
 
@@ -218,4 +230,6 @@ def remove_favorite(recipe_id):
         return {"success": "Recipe removed from favorites successfully"}, 200
     else:
         return {"error": "Recipe is not in your favorites"}, 404
+
+
 
