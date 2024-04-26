@@ -59,16 +59,25 @@ Stores information about users' favorite recipes, linking users and recipes they
 
 ### API Routes and Endpoints
 
-##### Auth Routes:  
-
--  [/token]
--  [/users/me]
-
-##### User Routes:
--  /users/<int:user_id>', methods=['GET']specific user.
--  /users', methods=['POST']
--  [PUT] /user/:id** 
--  [DELETE] /user/:id** 
+- [GET] : [/token]
+    - tokens for everyone!
+- [POST] - [/users]
+    - create a new user
+- [GET] - [/users/me]
+    - info about the user
+- [GET] - [/users/user_id]
+    - methods=specific user.
+- [PUT] - [/users/me]
+    - update the user
+- [DELETE] - [/users/me]
+    - delete current user
+---
+- [GET] - [/recipes]
+    - get all recipes
+- [GET] - [/recipes/<recipe_id>]
+    - get a specific recipe
+- [POST] - [/recipes]
+    - create a new recipe
 
 #### Possible Routes....
 
