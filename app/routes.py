@@ -1,6 +1,5 @@
 
-import secrets
-from flask import request
+from flask import request, render_template
 from . import app , db
 from .models import User, Recipe, Favorite, Ingredient, Direction
 from .auth import basic_auth, token_auth
@@ -11,6 +10,11 @@ from .auth import basic_auth, token_auth
 def get_token():
     user = basic_auth.current_user()
     return user.get_token()
+
+# Home
+@app.route("/")
+def index():
+    return render_template('index.html')
 
 # [POST] /recipes
 @app.route('/recipes', methods=['POST'])
