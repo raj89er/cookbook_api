@@ -59,44 +59,83 @@
 
 ### API Routes and Endpoints
 
-- [GET] : [/token]
-    - tokens for everyone!
-- [POST] - [/users]
-    - create a new user
-- [GET] - [/users/me]
-    - info about the user
-- [GET] - [/users/user_id]
-    - methods=specific user.
-- [PUT] - [/users/me]
-    - update the user
-- [DELETE] - [/users/me]
-    - delete current user
----
-- [GET] - [/recipes]
-    - get all recipes
-- [GET] - [/recipes/<recipe_id>]
-    - get a specific recipe
-- [POST] - [/recipes]
-    - create a new recipe
+### [POST] [/token]
+- **Description**: Authenticate and receive an access token.
+- **Auth Required**: Basic Auth (Username & Password)
 
-#### Possible Routes....
+### [GET] [/users/me]
+- **Description**: Retrieve the current user's details.
+- **Auth Required**: Token Auth
 
-[GET] /recipes: Retrieve a list of all recipes (no need to be logged in).
-[GET] /recipes/<recipe_id>: Get details of a specific recipe by its ID.
-[POST] /recipes: Create a new recipe (user needs to be logged in).
-[PUT] /recipes/<recipe_id>: Update an existing recipe (the user has to be the author).
-[DELETE] /recipes/<recipe_id>: Delete a recipe (the user has to be the author).
+## [PUT] [/users/me]
+- **Description**: Update the current user's details.
+- **Auth Required**: Token Auth
+- **Sample Payload**:
+```
+{
+  "username": "new_username",
+  "email": "new_email@example.com",
+  "password": "new_secure_password"
+}
+```
 
-Additionally, we can create other routes regarding the User and Recipe Tables as follows:
+[PUT] [/users/me]
+- **Authorization**: Bearer <access-token>
+- **Content-Type** application/json
+```
+{
+  "username": "new_username",
+  "email": "new_email@example.com",
+  "password": "new_secure_password"
+}
+```
+[POST] [/recipes]
+- **Authorization**: No
+- sample paylod
+```
+{
+  "title": "Chocolate Cake",
+  "cook_time": 45,
+  "prep_time": 30,
+  "ingredients": [
+    {"name": "Flour", "quantity": 2, "units": "cups"},
+    {"name": "Sugar", "quantity": 1, "units": "cup"}
+  ],
+  "directions": [
+    {"step_number": 1, "instruction": "Mix ingredients."},
+    {"step_number": 2, "instruction": "Bake at 350 degrees F."}
+  ],
+  "tips": "Use fresh ingredients for better taste."
+}
+```
+[GET] [/recipes]
+Description: Retrieve all recipes.
+Auth Required: No
 
-[GET] /users/recipes: Retrieve all recipes created by the user.
-[GET] /users/recipes/<recipe_id>: Get details of a specific recipe created by the user.
-[PUT] /users/recipes/<recipe_id>: Update a recipe created by the user.
-[DELETE] /users/recipes/<recipe_id>: Delete a recipe created by the user.
+[GET] [/recipes/<recipe_id>]
 
-/ home page
-/recipes
-/recipes/<recipe_id> 
+[PUT] [/recipes/<recipe_id>]
+Description: Update an existing recipe.
+Auth Required: Token Auth
+```
+{
+  "title": "Updated Chocolate Cake",
+  "cook_time": 50
+}
+```
+[DELETE] [/recipes/<recipe_id>]
+Description: Delete a specific recipe.
+Auth Required: Token Auth
+
+[GET] [/favorites]
+Description: Retrieve all favorite recipes of the current user.
+Auth Required: Token Auth
+
+[POST] [/favorites/<recipe_id>]
+
+[DELETE] [/favorites/<recipe_id>]
+
+
 
 ### Navbar and Pages
 - **Navbar:**

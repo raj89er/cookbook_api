@@ -18,46 +18,39 @@ def index():
 
 # [POST] /recipes
 @app.route('/recipes', methods=['POST'])
-def add_recipe():
-    data = request.json
-    # JSON check
+def create_recipe():
     if not request.is_json:
         return {"error": "Request must be in JSON format"}, 400
-    # Required fields check
-    required_fields = ['title', 'cook_time', 'prep_time']
-    missing_fields = []
-    for field in required_fields:
-        if field not in data:
-            missing_fields.append(field)
-    if missing_fields:
-        return {"error": f"You're missing the following fields in the request: {', '.join(missing_fields)}"}, 400
-    # Extract data from JSON
     data = request.get_json()
-    title = data.get('title')
-    cook_time = data.get('cook_time')
-    prep_time = data.get('prep_time')
-    ingredients_data = data.get('ingredients', [])
-    directions_data = data.get('directions', [])
-    tips = data.get('tips')
-    new_recipe = Recipe(title=title, cook_time=cook_time, prep_time=prep_time, tips=tips)
+    required_fields = ['title', 'cook_time', 'prep_time', 'ingredients']
+    missing_fields = [field for field in required_fields if field not in data]
+    if missing_fields:
+        return {"error": f"Missing fields: {', '.join(missing_fields)}"}, 400
     # Create the new recipe
+    new_recipe = Recipe(
+        title=data['title'],
+        cook_time=data.get('cook_time'),
+        prep_time=data.get('prep_time'),
+        tips=data.get('tips', '')
+    )
     # Add ingredients to the recipe
-    for ingredient_data in ingredients_data:
-        name = ingredient_data.get('name')
-        quantity = ingredient_data.get('quantity')
-        units = ingredient_data.get('units')
-        new_recipe.add_ingredient(name=name, quantity=quantity, units=units)
-
-    # Add directions to the recipe
-    for direction_data in directions_data:
-        step_number = direction_data.get('step_number')
-        instruction = direction_data.get('instruction')
-        new_recipe.add_direction(step_number=step_number, instruction=instruction)
-
-    # Save the new recipe to the database
-    db.session.add(new_recipe)
-    db.session.commit()
-    return {"success": f"Recipe {new_recipe.title} created successfully"}, 201
+    for ingredient_data in data['ingredients']:
+        if 'name' not in ingredient_data or 'quantity' not in ingredient_data or 'units' not in ingredient_data:
+            return {"error": "Each ingredient must include a name, quantity, and units"}, 400
+        ingredient = Ingredient(
+            name=ingredient_data['name'],
+            quantity=ingredient_data['quantity'],
+            units=ingredient_data['units'],
+            recipe=new_recipe  # Link ingredient to the recipe
+        )
+        db.session.add(ingredient)
+    try:
+        db.session.add(new_recipe)
+        db.session.commit()
+        return {"success": f"Recipe {new_recipe.title} created successfully with ingredients"}, 201
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 500
 
 ## [GET] /users/me
 @app.route('/users/me', methods=['GET'])
@@ -130,40 +123,6 @@ def get_recipe(recipe_id):
         return recipe.to_dict(), 200
     else:
         return {'error': 'Recipe not found'}, 404
-
-# [POST] /recipes
-@app.route('/recipes', methods=['POST'])
-def create_recipe():
-    data = request.json
-    # JSON check
-    if not request.is_json:
-        return {"error": "Request must be in JSON format"}, 400
-    # Required fields check
-    required_fields = ['title', 'cook_time', 'prep_time']
-    missing_fields = []
-    for field in required_fields:
-        if field not in data:
-            missing_fields.append(field)
-    if missing_fields:
-        return {"error": f"You're missing the following fields in the request: {', '.join(missing_fields)}"}, 400
-    # Extract data from JSON
-    title = data['title']
-    cook_time = data['cook_time']
-    prep_time = data['prep_time']
-    ingredients_data = data.get('ingredients', [])
-    directions_data = data.get('directions', [])
-    tips = data.get('tips', '')
-    # Create the new recipe
-    new_recipe = Recipe(
-        title=title,
-        cook_time=cook_time,
-        prep_time=prep_time,
-        ingredients=[Ingredient(**ingredient) for ingredient in ingredients_data],
-        directions=[Direction(**direction) for direction in directions_data],
-        tips=tips)
-    db.session.add(new_recipe)
-    db.session.commit()
-    return {"success": "Recipe created successfully"}, 201
 
 
 ## [PUT] /recipes/<recipe_id>
